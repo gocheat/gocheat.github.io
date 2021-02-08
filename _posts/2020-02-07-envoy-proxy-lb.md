@@ -44,25 +44,36 @@ Envoy의 filters - router 부분에 매핑된 cluster 설정을 따라 요청에
 ```yaml
 static_resources:
     ...
+  
     clusters:
       - name: internal_service_A
         connect_timeout: 30s
         type: static
+        http2_protocol_options:
+          stream_error_on_invalid_http_messaging: true
         lb_policy: ROUND_ROBIN
         load_assignment:
-          cluster_name: internal_service_A
-          endpoints:
-            - lb_endpoints:
-                - endpoint:
-                    address:
-                      socket_address:
-                        address: www.google.com
-                        port_value: 443
+            cluster_name: internal_service_A
+            endpoints:
+              - lb_endpoints:
+                  - endpoint:
+                      address:
+                        socket_address:
+                          address: 10.0.0.1
+                          port_value: 80
+                  - endpoint:
+                      address:
+                        socket_address:
+                          address: 10.0.0.2
+                          port_value: 80
 ```
-아래는 몇가지 설정을 공유 드립니다.
+아래는 몇가지 중요한 설정에 대해 공유 드립니다.
+- http2_protocol_options.stream_error_on_invalid_http_messaging: grpc stream을 사용할경우 잘못된 HTTP 메시징 또는 헤더의 허용 여부입니다. `false` 지정할 경우 잘못된 HEADERS 프레임이 전달 오면 HTTP/2 연결이 종료 됩니다. 운영환경에서는 true로 처리하여 서비스 내에서 예외를 커스텀하는것이 좋은 전략입니다.
+  (참고: https://tools.ietf.org/html/rfc7540#section-8.1)
 - **connect_timeout**: 요청에 대한 응답 대기 시간으로 짧은 시간은 실제 운영 환경에선 권장하지 않습니다.
 - **type**: 서비스 검색에 따른 유형, 정적 자원에 대한 부하 분산이기 때문에 `static` 으로 설정 하였습니다.
 - **lb_policy**: 부하 분산에 대한 정책 (default: ROUND_ROBIN)
+- **lb_endpoints**: 부하 분산을 
 
 위 같이 설정할 경우 lb_policy 에 맞게 알아서 아래 endpoints 에 가중치를 두어 부하분산을 처리하게 됩니다. 
 그러나 이렇게만 설정할 경우에는 실제로 endpoints 중에 서비스 하나가 죽을 경우에도 감지하지 못하고 분산이 이루어지기 때문에 
@@ -70,6 +81,63 @@ static_resources:
 
 Health Check 를 통한 Endpoint 관리
 ---
+```yaml
+clusters:
+    - name: internal_service_A
+      health_checks:
+        - http_health_check:
+            path: '/heathcheck'
+          timeout: 2s
+          interval: 2s
+          unhealthy_threshold: 1
+          healthy_threshold: 1
+          always_log_health_check_failures: true
+          event_log_path: /var/log/envoy/health_check.log
+      load_assignment:
+        cluster_name: internal_service_A
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  health_check_config:
+                    port_value: 8282
+                  address:
+                    socket_address:
+                      address: 10.0.0.1
+                        port_value: 80
+              - endpoint:
+                  health_check_config:
+                    port_value: 8282
+                  address:
+                    socket_address:
+                      address: 10.0.0.2
+                      port_value: 80
+```
+
 
 Outlier detection 를 통한 Endpoint 관리
 ---
+
+```yaml
+clusters:
+    - name: internal_service_A
+      outlier_detection:
+        consecutive_5xx: 3
+        interval: 10s
+        base_ejection_time: 10s
+        max_ejection_percent: 50
+      load_assignment:
+        cluster_name: internal_service_A
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: 10.0.0.1
+                      port_value: 80
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: 10.0.0.2
+                      port_value: 80
+              ... 
+```
