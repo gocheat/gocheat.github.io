@@ -1,15 +1,15 @@
 ---
 layout: single
-title:  "Envoy proxy로 GRPC 서비스 부하 분산"
+title:  "On-Premise 환경에서 Envoy로 GRPC 서비스 부하 분산 구성"
 date: 2020-02-07
 tags: [envoy, lb, grpc]
 categories: envoy
 
 ---
 
-해당 포스팅은 MSA로 구성된 서비스 간 GRPC 통신을 Envoy로 부하분산을 어떻게 설정했는지 기록하고자 합니다.
+해당 포스팅은 MSA로 구성된 서비스 간 GRPC 통신을 Envoy로 부하분산을 어떻게 설정했는지 기록했습니다.
 
-_(본 문서는 envoy 1.17 버전을 기준으로 기록합니다.)_ 
+_(본 포스트는 envoy 1.17 버전(V3)으로 작성하였습니다.)_ 
 
 개요
 ---
@@ -70,11 +70,13 @@ static_resources:
                           port_value: 80
 ```
 아래는 몇가지 중요한 설정에 대해 공유 드립니다.
-- http2_protocol_options.stream_error_on_invalid_http_messaging: grpc stream을 사용할경우 잘못된 HTTP 메시징 또는 헤더의 허용 여부입니다. `false` 지정할 경우 잘못된 HEADERS 프레임이 전달 오면 HTTP/2 연결이 종료 됩니다. 운영환경에서는 true로 처리하여 서비스 내에서 예외를 커스텀하는것이 좋은 전략입니다.
+- http2_protocol_options.stream_error_on_invalid_http_messaging: grpc stream을 사용할경우 잘못된 HTTP 메시징 또는 헤더의 허용 여부입니다. `false` 지정할 경우 잘못된 HEADERS 프레임이 전달 오면 HTTP/2 연결이 종료 됩니다. 운영환경에서는 true로 처리하여 서비스 내에서 예외를 커스텀하도록 처리하였습니다. 
   (참고: https://tools.ietf.org/html/rfc7540#section-8.1)
 - **connect_timeout**: 요청에 대한 응답 대기 시간으로 짧은 시간은 실제 운영 환경에선 권장하지 않습니다.
 - **type**: 서비스 검색에 따른 유형, 정적 자원에 대한 부하 분산이기 때문에 `static` 으로 설정 하였습니다.
-- **lb_policy**: 부하 분산에 대한 정책 (default: ROUND_ROBIN)
+- **lb_policy**: 부하 분산에 대한 정책 (종류: `ROUND_ROBIN`, `LEAST_REQUEST`, `RING_HASH`, `RANDOM` 등이 있습니다.)
+> 각 부하 분산에 대한 알고리즘은 https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers#arch-overview-load-balancing-types 참조 
+
 - **lb_endpoints**: lb_policy 옵션에 따라 부하분산 할 업스트림 서비스 입니다.
 
 위 같이 설정할 경우 lb_policy 에 맞게 알아서 아래 endpoints 에 가중치를 두어 부하분산을 처리하게 됩니다. 
@@ -181,4 +183,4 @@ clusters:
 
 참고문서
 ---
-- https://www.envoyproxy.io/docs/envoy/v1.17.0
+- <https://www.envoyproxy.io/docs/envoy/v1.17.0>
