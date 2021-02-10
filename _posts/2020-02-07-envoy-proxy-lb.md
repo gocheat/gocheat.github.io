@@ -7,7 +7,9 @@ categories: envoy
 
 ---
 
-해당 포스팅은 MSA로 구성된 서비스 간 envoy를 통한 부하분산을 어떻게 설정했는지 공유하고자 합니다.
+해당 포스팅은 MSA로 구성된 서비스 간 GRPC 통신을 Envoy로 부하분산을 어떻게 설정했는지 기록하고자 합니다.
+
+_(본 문서는 envoy 1.17 버전을 기준으로 기록합니다.)_ 
 
 개요
 ---
@@ -73,14 +75,19 @@ static_resources:
 - **connect_timeout**: 요청에 대한 응답 대기 시간으로 짧은 시간은 실제 운영 환경에선 권장하지 않습니다.
 - **type**: 서비스 검색에 따른 유형, 정적 자원에 대한 부하 분산이기 때문에 `static` 으로 설정 하였습니다.
 - **lb_policy**: 부하 분산에 대한 정책 (default: ROUND_ROBIN)
-- **lb_endpoints**: 부하 분산을 
+- **lb_endpoints**: lb_policy 옵션에 따라 부하분산 할 업스트림 서비스 입니다.
 
 위 같이 설정할 경우 lb_policy 에 맞게 알아서 아래 endpoints 에 가중치를 두어 부하분산을 처리하게 됩니다. 
 그러나 이렇게만 설정할 경우에는 실제로 endpoints 중에 서비스 하나가 죽을 경우에도 감지하지 못하고 분산이 이루어지기 때문에 
 부가적인 설정이 필요합니다.
 
+
 Health Check 를 통한 Endpoint 관리
 ---
+envoy에서는 Health Check 설정을 통해 LB의 endpoint 설정을 제거 혹은 복구 할 수 있게 구성을 지원하고 있습니다.
+크게 `HTTP`, `L3/L4`, `Redis` 등을 지원하고 있으며 운영중인 서비스는 HTTP를 통해 200 응답을 예상할수 있습니다.
+
+아래는 Health Check 예제 입니다.
 ```yaml
 clusters:
     - name: internal_service_A
@@ -113,9 +120,28 @@ clusters:
                       port_value: 80
 ```
 
+- **health_checks.http_health_check**: 서비스의 상태 체크를 할 HTTP Path 입니다.
+- **health_checks.interval**: 클러스터의 상태체크의 반복 주기입니다. 위의 옵션에 따르면 2초 단위로 업스트림 호스트를 체크합니다. 
+- **health_checks.unhealthy_threshold**: interval 내의 비정상 상태 확인 수입니다. 해당 임계치를 넘으면 LB 구성에 제외시킵니다.
+- **health_checks.healthy_threshold**: interval 내의 정상 상태 확인 수입니다. 해당 임계치를 넘으면 LB 구성에서 포함시킵니다.
+  
+상태 체크를 할 업스트림의 호스트를 별도로 구성할수도 있습니다.
+- **health_check_config**: 위의 `health_checks` 설정을 적용할 업스트림의 host 정보
+
 
 Outlier detection 를 통한 Endpoint 관리
 ---
+Outlier detection 옵션을 통해 특정 업스트림의 오류에 대해 사전에 감지하고 예방할수 있는 기능을 제공합니다.
+
+Envoy 문서의 이상 감지 방출 알고리즘에 따르면 아래와 같습니다.
+
+1. `outlier_detection` 설정된 값에 따라 이상 감지를 판단합니다. (`consecutive_5xx`)
+2. 방출된 호스트가 없으면  `max_ejection_percent` 에 따라 방출 할지 여부를 판단합니다. (그러나 설정상 90퍼라고 해도 최소 1개의 호스트는 무조건 배출합니다.)
+3. 최초 호스트가 방출되면 `base_ejection_time` * 연속적으로 배출된 횟수를 곱한 값입니다.
+4. 방출 시간이 `max_ejection_time` 에 도달하면 더 이상 시간이 증가하지 않습니다. (기본 300초)
+5. 방출 시간 중에 호스트가 이상 감지에서 정상 상태로 확인 된다고 가정하면 배출 시간을 최소로 낮추는데 아래와 같은 계산식을 갖게 됩니다.
+
+**_( outlier_detection.max_ejection_time / outlier_detection.base_ejection_time * outlier_detection.interval )_**
 
 ```yaml
 clusters:
@@ -141,3 +167,18 @@ clusters:
                       port_value: 80
               ... 
 ```
+
+아래는 탐지유형 몇가지를 소개드리고자 합니다.
+
+- Consecutive 5xx: 업스트림 호스트의 응답 코드가 5xx 유형이 발생할 경우 이상으로 판단합니다.
+- Consecutive Gateway Failure: 게이트웨이에서 연속적으로 에러(5xx 오류 하위집합, 시간초과, TCP 재설정등)가 발생할 경우 이상으로 판단합니다.
+- Consecutive Local Origin Failure: 업스트림 호스트의 시간초과, TCP 재설정, ICMP 오류 등 로컬에서 발생합니다.
+- Success Rate, Failure Percentage: 호스트에 대한 데이터를 집계한 후, 주어진 간격으로 통계값 기준으로 성공률과 실패율을 결정한 뒤 이상으로 판단합니다. 
+
+이상으로 위와 같이 envoy를 통한 LB 구성 및 호스트 제거/복구 프로세스를 통해 실제 프로젝트에 적용하였습니다.
+
+적용하면서 우여곡절이 많았던것은 오픈소스를 사용함에 있어 버전별로 설정의 이름이라던지 제공여부등 일부 상이한 부분이 있어서 본인이 사용하고 있는 버전에서 제공하는 기능 및 옵션을 꼼꼼히 파악해야함을 느낄수 있었습니다. (실제 운영할때도 잘못된 설정으로 장애가 몇번 나서 아찔한 기억이..)
+
+참고문서
+---
+- https://www.envoyproxy.io/docs/envoy/v1.17.0
