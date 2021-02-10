@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gocheat.github.io//sitemap.xml
