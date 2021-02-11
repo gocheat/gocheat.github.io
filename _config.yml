@@ -12,7 +12,7 @@
 
 # theme                  : "minimal-mistakes-jekyll"
 # remote_theme           : "mmistakes/minimal-mistakes"
-minimal_mistakes_skin    : "dark" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+minimal_mistakes_skin    : "air" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
 # Site Settings
 locale                   : "ko"
@@ -94,15 +94,18 @@ analytics:
 # Site Author
 author:
   name             : "GOCHEAT"
-  avatar           :  "/assets/images/ast.png"
+  avatar           :  "/assets/images/aa2.png"
   bio              : |
-    한쿡에서 열심히 개발을 배우고 있는 개발자입니다! 킴치 좋아요
+    개발하면서 경험한 내용을
+    기록하고 공유하는 공간입니다!
+    <br><br>
+    💻 <strong>DevOps, Agile</strong>에 관심이 많습니다.
   location         : South Korea
   email            :
   links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
-      # url: "mailto:your.name@email.com"
+      url: "mailto:itsinil@gamil.com"
     - label: "Website"
       icon: "fas fa-fw fa-link"
       # url: "https://your-website.com"
@@ -117,7 +120,7 @@ author:
       url: "https://github.com/gocheat"
     - label: "Instagram"
       icon: "fab fa-fw fa-instagram"
-      # url: "https://instagram.com/"
+      url: "https://www.instagram.com/__gocheat"
 
 # Site Footer
 footer:
@@ -139,7 +142,7 @@ footer:
       # url:
     - label: "Instagram"
       icon: "fab fa-fw fa-instagram"
-      # url:
+      url: "https://www.instagram.com/__gocheat/"
 
 
 # Reading Files
