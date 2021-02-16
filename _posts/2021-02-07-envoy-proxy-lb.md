@@ -1,6 +1,6 @@
 ---
 layout: single
-title:  "On-Premise 환경에서 Envoy로 GRPC 서비스 부하 분산 구성"
+title:  "On-Premise 환경에서 Envoy로 GRPC 서비스 부하 분산 구성하기"
 date: 2021-02-07
 tags: [envoy, lb, grpc]
 categories: envoy
