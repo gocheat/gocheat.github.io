@@ -13,8 +13,7 @@ Ansible이란?
 python 으로 구현된 오픈소스로써 서버의 프로비저닝, SW 배포 등의 자동화를 관리해주는 도구(Infrastructure as Code)입니다.
 
 ![2](/assets/images/2021-02-15-ansible-basic/1.png){: width="50%" }{: .center}
-_\<Ansible로 자동화 가능한 기능\>_
-{: .text-center}
+
 
 > **Infrastructure as a Code(IaC)란?** 컴퓨터의 인프라 구성을 소프트웨어를 개발 하듯이 코드로 작성하는 것을 의미합니다. Ansible 또한 이런 개념이 도입 되어 규격화된 환경과 묘듈 구성을 통해 배포되는 모든 서버가 동일한 환경을 유지할 수 있도록 해줍니다.
 
