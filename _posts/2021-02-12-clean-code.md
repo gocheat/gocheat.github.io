@@ -1,7 +1,7 @@
 ---
 layout: single
 title:  "클린코드(Clean Code)를 공부하며"
-date: 2020-02-12
+date: 2021-02-12
 tags: [cleancode, refactoring, 마틴파울러]
 categories: common
 
@@ -29,7 +29,7 @@ _해당 포스팅은 프로그래밍의 기초와 마음가짐에 대해 `클린
 점점 코드의 크기와 복잡도는 증가하게 되고 기존 기능에 버그를 유발할까 두려워 리팩토링도 어려워지게 마련입니다. 이렇게 부채가 쌓이게 되면 소위 냄새나는 코드가 만들어지고 소프트웨어는 노후화될 수밖에 없습니다. 
 
 
-![<TechnicalDebt - 클린코드 작성을 위해 개발자들이 언젠가 해결해야 되는 부채>](/assets/images/2020-02-12-clean-code/3_1_a.png)
+![<TechnicalDebt - 클린코드 작성을 위해 개발자들이 언젠가 해결해야 되는 부채>](/assets/images/2021-02-12-clean-code/3_1_a.png)
 
 _<TechnicalDebt - 클린코드 작성을 위해 개발자들이 언젠가 해결해야 되는 부채>_
 
