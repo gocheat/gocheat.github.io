@@ -75,7 +75,8 @@ static_resources:
 - **connect_timeout**: 요청에 대한 응답 대기 시간으로 짧은 시간은 실제 운영 환경에선 권장하지 않습니다.
 - **type**: 서비스 검색에 따른 유형, 정적 자원에 대한 부하 분산이기 때문에 `static` 으로 설정 하였습니다.
 - **lb_policy**: 부하 분산에 대한 정책 (종류: `ROUND_ROBIN`, `LEAST_REQUEST`, `RING_HASH`, `RANDOM` 등이 있습니다.)
-> 각 부하 분산에 대한 알고리즘은 https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers#arch-overview-load-balancing-types 참조 
+
+> 각 부하 분산에 대한 알고리즘은 <https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/load_balancers> 참조 
 
 - **lb_endpoints**: lb_policy 옵션에 따라 부하분산 할 업스트림 서비스 입니다.
 
