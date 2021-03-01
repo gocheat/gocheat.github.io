@@ -33,7 +33,7 @@ dev_dependencies:
 
 ### 2. json_serializable를 통한 요청,응답 직렬화 클래스 생성하기
 
-우선 API 요청 코드를 짜기 위해서는 `Request`,`Response`에 대해 직렬화가 필요한 클래스를 싱성해줍니다.
+우선 API 요청 코드를 짜기 위해서는 `Request`,`Response`에 대해 직렬화가 필요한 클래스를 생성해줍니다.
 
 예를 들어서 로그인 API 를 개발한다고 가정해보겠습니다. 그렇다면 로그인 API 요청할 직렬화 클래스를 아래와 같이 작성합니다.
 
@@ -82,6 +82,44 @@ class LoginResponse{
 
 `flutter pub run build_runner build` 명령어를 루트에서 입력하게 되면 JSON 직렬화 코드를 생성할 수 있습니다. 그러나 매번 수정에 따른 일회성으로 하는 코드 생성은 시간이 오래 걸리기때문에 
 `flutter pub run build_runner watch` 명령어를 통해 프로젝트 파일들의 변화를 지켜보고 자동으로 코드를 생성하게 해줄 수 있습니다.
+
+위의 명령을 처리하고 나면 `auth.g.dart` 라는 파일이 생긴것을 확인 할수 있습니다. 아래는 자동으로 생성된 코드 입니다.
+
+```dart
+// auth.g.dart 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'auth.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) {
+  return LoginRequest(
+    type: json['type'] as int,
+    accessToken: json['accessToken'] as String,
+  );
+}
+
+Map<String, dynamic> _$LoginRequestToJson(LoginRequest instance) =>
+    <String, dynamic>{
+      'type': instance.type,
+      'accessToken': instance.accessToken,
+    };
+
+LoginResponse _$LoginResponseFromJson(Map<String, dynamic> json) {
+  return LoginResponse(
+    token: json['token'] as String,
+  );
+}
+
+Map<String, dynamic> _$LoginResponseToJson(LoginResponse instance) =>
+    <String, dynamic>{
+      'token': instance.token,
+    };
+
+```
 
 ### 4. LOGIN API 호출 최종 코드 
 
