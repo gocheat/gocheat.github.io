@@ -123,7 +123,7 @@ Map<String, dynamic> _$LoginResponseToJson(LoginResponse instance) =>
 
 ### 4. LOGIN API 호출 최종 코드 
 
-아래는 위의 직렬화 객채를 통해 Login API를 요청하는 예제 코드입니다. 
+아래는 직렬화 객체를 통해 Login API를 요청하는 예제 코드입니다. 
 
 ```dart
 @JsonSerializable()
