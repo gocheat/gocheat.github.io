@@ -3,7 +3,7 @@ layout: single
 title:  "Spring Boot 에서 Mock을 통한 단위 테스트 적용하기"
 date: 2021-04-11
 tags: [java, spring, boot, tdd, testing, mockito, mock, stub]
-categories: monitoring
+categories: spring
 ---
 
 이번 포스팅에서는 Spring F/W 내에서 Mock을 통한 단위테스트 구현에 대해서 간단하게 알아봅니다.
